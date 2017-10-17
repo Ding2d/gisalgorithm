@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>
+            Hello Canvas
+        </title>
+   
+ 
+ 
+<script>
+var first=0;
+
+    //window.onload=
+    function drawline(){        
+            var c=document.getElementById('c1');
+        var cxt=c.getContext('2d');    
+            c.onmousedown = function(ev)
+            {
+                var ev = ev || window.event;
+                cxt.moveTo(ev.clientX-c.offsetLeft,ev.clientY-c.offsetTop);
+                document.onmousemove = function(ev) 
+            {
+                var ev = ev || window.event;//获取event对象
+                cxt.lineTo(ev.clientX-c.offsetLeft,ev.clientY-c.offsetTop);
+                cxt.stroke();
+            };
+            c.onmouseup = function() 
+            {
+                document.onmousemove = null;
+                document.onmouseup = null;
+            };
+            };
+            
+        };
+       
+       function drawSline(){            
+        var c=document.getElementById('c1');
+        var cxt=c.getContext('2d');       
+            c.onmousedown = function(ev){
+            var ev = ev || window.event;
+            cxt.moveTo(ev.clientX-c.offsetLeft,ev.clientY-c.offsetTop);
+            document.onmouseup = function(ev) 
+            {
+                var ev = ev || window.event;
+                cxt.lineTo(ev.clientX-c.offsetLeft,ev.clientY-c.offsetTop);
+                cxt.stroke();
+            };
+            }; 
+              
+       };     
+        
+       function drawRect(){       
+            var c=document.getElementById('c1');
+            var cxt=c.getContext('2d');                     
+            c.onmousedown = function(ev){
+            var ev = ev || window.event;
+            var x=ev.clientX-c.offsetLeft;
+            var y=ev.clientY-c.offsetTop;
+            cxt.moveTo(ev.clientX-c.offsetLeft,ev.clientY-c.offsetTop);
+            document.onmouseup = function(ev) 
+            {
+                var ev = ev || window.event;
+                cxt.lineTo(ev.clientX-c.offsetLeft,y);
+                cxt.moveTo(ev.clientX-c.offsetLeft,y);
+                cxt.lineTo(ev.clientX-c.offsetLeft,ev.clientY-c.offsetTop);
+                cxt.moveTo(ev.clientX-c.offsetLeft,ev.clientY-c.offsetTop);
+                cxt.lineTo(x,ev.clientY-c.offsetTop);
+                cxt.moveTo(x,ev.clientY-c.offsetTop);
+                cxt.lineTo(x,y);
+                cxt.stroke();
+            };
+            };   
+             
+       };  
+        
+    function setCanvas()
+       {
+        var c=document.getElementById('c1');
+        var cxt=c.getContext('2d');
+           cxt.strokeStyle=document.getElementById('color').value;
+           cxt.lineWidth=document.getElementById('width').value;
+       }
+    function clearCanvas()
+       {
+        var c=document.getElementById('c1');
+        var cxt=c.getContext('2d');
+
+        c.height=c.height; 
+       }
+
+</script>
+   </head>
+
+<body>
+    <button onclick="drawline()">画线</button>
+    <button onclick="drawSline()">画直线</button>
+    <button onclick="drawRect()">画矩形</button>
+    <br>
+    color:<select id="color">
+        <option value="red">red</option>
+        <option value="green">green</option>
+        <option value="blue">blue</option>
+        </select>
+       
+    width:<input id="width" type="text" name="width" > 
+    <br>
+    <input type="button" onclick="setCanvas()" value="config">
+    <input type="submit" onclick="clearCanvas()" value="clear">
+    <br> <br>   
+    <canvas id="c1" width="800" height="400" style="border:1px solid #c3c3c3;" >
+        Your browser does not support the canvas element.
+        </canvas>
+
+</body>
+
+</html>

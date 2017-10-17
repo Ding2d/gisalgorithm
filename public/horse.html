@@ -1,0 +1,150 @@
+<DOCTYPRE html>
+    <html>
+        <head>
+            <title>
+                跳马
+            </title>
+    
+        </head>
+            <body>                                               
+             
+                    <br>
+                    棋盘行数:<input type="number" name="row" id="row"  />
+                    棋盘列数:<input type="number" name="column" id="column"  />                            
+                    <br>
+                    起跳点行数:<input type="number" name="fromRow" id="fromRow"/>
+                    起跳点列数:<input type="number" name="fromColumn" id="fromColumn" />
+                    <br>
+                    <input type="submit" value="确定" onclick="main()"/>
+                
+
+
+                <script>
+                    var direction=8;    
+                    var MaxStep=50;  //最大步数
+                    var num=0;
+                    var path=new Array(MaxStep + 1); 
+
+                    
+                    for(var i=0;i<(MaxStep+1);i++)
+                    {
+                        path[i]=new Array(2);
+                    }//存路径的数组
+                    //dx,dy分别用来表示八个方向的移动，根据运动量来表示
+                    var dx=new Array( 0, 1, 2, 2, 1, -1, -2, -2, -1);
+                    var dy=new Array( 0, -2, -1, 1, 2, -2, -1, 1, 2);
+                   
+                    
+                    function Path(MAX_X, MAX_Y, step,xy)
+                    {
+                        //初始化棋盘
+                        for (var i = 0; i < MAX_Y;i++)
+                        for (var j = 0; j < MAX_X; j++)
+                            xy[i][j] = 0;
+                        //对之前跳过的点进行赋值
+                        for (var i = 1; i < step; i++)
+                            xy[path[i][1]][path[i][0]] = 1;
+
+                        
+                    }
+
+
+                    function Judgment(x, y, xy)
+                    {
+                        var judge = false;
+
+                        if (xy[y][x]!=0)//重复结点，错误路径
+                            judge = true;	
+                        else
+                            xy[y][x] = 1;
+                        return judge;//false为可行路径
+                    }
+
+
+                    function Jump( MAX_X, MAX_Y,x,y,step,xy)
+                    {
+                        var t1, t2;
+                        var x1, y1;
+
+                        Path(MAX_X, MAX_Y,step,xy);
+                        for (var k = 1; k <= direction; k++)
+                        {
+                            //朝八个方向中的某个方向跳跃
+                            x1 = x + dx[k];
+                            y1 = y + dy[k];
+
+                            //跳出边界，则舍弃这条路径
+                            if (x1 > MAX_X || y1 > MAX_Y || x1 < 0 || y1 < 0)
+                                continue;
+                                                                               
+                            t1 = (x1 == path[0][0]);
+                            t2 = (y1 == path[0][1]);
+                            //判断在不在棋盘内
+                            if ((x1 >= 0) && (x1 <= MAX_X)&&(y1 >= 0) && (y1 <= MAX_Y))
+                            {
+                                //记录位置
+                                if (!Judgment(x1, y1,xy))
+                                {//返回false表示没有重复，可以继续寻找路径
+                                  
+                                    path[step][0] = x1;
+                                    path[step][1] = y1;
+                                  
+                                    if (t1 && t2)
+                                    {
+                                        num++;
+                                        document.write("No."+num+":");
+
+                                        for (var i = 0; i <= step; i++)
+                                        {
+                                            document.write( "("+path[i][0]+","+path[i][1]+")");
+                                            if (i != step)
+                                                document.write(" --> ");
+                                        }                                   
+                                        document.write("<br>");
+                                    }
+                                    else
+                                        Jump(MAX_X, MAX_Y,x1, y1, step + 1,xy);                                    
+                                }
+                            }
+                        }
+                    }
+
+
+                    function main()
+                    {
+                        //初始位置           
+                       
+                        var MAX_X; 
+                        var MAX_Y;    
+                        var a,b;
+                      
+                       
+                        MAX_X=document.getElementById("column").value;
+                        MAX_Y=document.getElementById("row").value;
+                        a=path[0][0]=document.getElementById("fromColumn").value;          
+                        b=path[0][1]=document.getElementById("fromRow").value;
+                        document.write("棋盘行数："+MAX_X+"  棋盘列数："+MAX_Y+"<br>");
+                        document.write("起始点行数："+a+"  起始点列数："+b+"<br>");
+                        
+
+                        if(MAX_X>20 || MAX_Y>20 || a>20 ||b>20 || (a+1)>MAX_X || (b+1)>MAX_Y){
+                          document.write("ERROR!");
+                        }
+                        var xy=new Array(MAX_Y+1);
+                        for(var i=0;i<MAX_Y+1;i++){
+                            xy[i]=new Array(MAX_X+1);
+                        }
+                        for(var i=0;i<MAX_Y+1;i++){
+                            for(var j=0;j<MAX_X+1;j++){
+                                xy[i][j]=0;
+                            }
+                        }
+                 
+                        Jump(MAX_X, MAX_Y,0, 0, 1,xy);
+                        document.write("总方案数"+ num);      
+                    }
+
+                </script>
+            </body>
+    </html>
+</DOCTYPRE>

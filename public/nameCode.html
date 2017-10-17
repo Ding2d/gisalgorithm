@@ -1,0 +1,174 @@
+<html>  
+        <head>  
+            <title>名称编码</title>  
+        </head>
+        <script>
+    
+    function co(id,x,y)
+    {
+        this.id=id;
+        this.x=x;
+        this.y=y;
+    }
+    
+    function processFiles()
+    {
+        var file=document.getElementById("fileInput").files[0];
+        var reader=new FileReader();
+        reader.readAsText(file);
+        reader.onload=function(e)
+        {
+            var str = this.result;//读取文本
+            var number = new Array();
+            for(var k=0;k<100;k++)
+            {    //一维长度为i,i为变量，可以根据实际情况改变
+               number[k]=new co(-1,-1.0,-1.0);  //声明二维，每一个一维数组里面的一个元素都是一个数组；	
+            }
+    
+            draw(digitalExtraction(str,number));//画图
+        }
+        
+    }
+    //提取数字，并存入数组
+    function digitalExtraction(str,number)
+    {
+        //将0-9还有.L之外的都换成B，包括逗号、换行符等
+        var heap= str.replace(/[^0-9.L]/ig,"B");
+        var numcharacter="";//存储数字字符
+        //var number =new Array();提取数字数组
+        
+        var index=0;
+        var flag=0;//heap字符串当前标记
+        var n=0;//标识数字与字符转换位置
+        var character=heap[flag];//获取字符串的一个字符
+        // document.write(heap);
+        while(character!=null)
+        {
+            if(character=="L")
+            {
+                    number[index].id=parseInt(heap[flag+1]);
+                    flag=flag+3;
+                    character=heap[flag];
+                    newLine=true;
+            }
+            if(character!="B")
+            {
+                //n=1;
+                numcharacter+=character;
+            }
+            else
+            {
+                if(numcharacter=="")
+                {
+                    character=heap[++flag];
+                    continue;
+                }
+      
+                if(number[index].x==-1)               
+                {
+                    number[index].x=parseFloat(numcharacter);
+                    numcharacter="";
+                    if(number[index].id==-1)                 
+                        number[index].id=number[index-1].id;
+    
+                }
+                else
+                {
+                    number[index].y=parseFloat(numcharacter);
+                    numcharacter="";
+                    index++;
+                    
+                }
+    
+            }
+                character=heap[++flag];
+        }
+        
+        return number;
+    }
+    function draw(number)
+    {
+        var canvas=document.getElementById('myCanvas');   
+        var ctx=canvas.getContext('2d');
+        
+        var w = 170;
+        var h = 170;
+        ctx.lineWidth =1;
+        ctx.globalCompositeOperation = 'destination-over';
+            for( var i = 1; i * 10 <= h; i++ )
+            {
+              ctx.strokeStyle = "gray";
+              ctx.beginPath();
+              ctx.moveTo(10,i*10);
+              ctx.lineTo(w,i*10);
+              ctx.stroke();
+            }
+            //再画纵线
+            for( var j = 1; j * 10 <= w; j++ )
+            {
+              ctx.strokeStyle = "gray";
+              ctx.beginPath();
+              ctx.moveTo(j*10, 10);
+              ctx.lineTo(j*10, h);
+              ctx.stroke();
+            }
+            //绘制边框
+            ctx.lineWidth =1;
+            ctx.strokeStyle = "black";
+            ctx.beginPath();
+            ctx.moveTo(0+10,0+10);
+            ctx.lineTo(w,0+10);
+            ctx.stroke();
+    
+            ctx.strokeStyle = "black";
+            ctx.beginPath();
+            ctx.moveTo(0+10,0+10);
+            ctx.lineTo(0+10,h);
+            ctx.stroke();
+
+            ctx.strokeStyle = "black";
+            ctx.beginPath();
+            ctx.moveTo(0+10,h);
+            ctx.lineTo(w,h);
+            ctx.stroke();
+
+            ctx.strokeStyle = "black";
+            ctx.beginPath();
+            ctx.moveTo(w,0+10);
+            ctx.lineTo(w,h);
+            ctx.stroke();
+    
+    
+    
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = "black";
+            // ctx.beginPath();
+            // ctx.moveTo(1.7*10,4.7*10);
+            // ctx.lineTo(8.1*10,8.7*10);
+            // ctx.stroke();
+            ctx.beginPath();           
+            ctx.moveTo(number[0].x*10,number[0].y*10);
+        for(var i=1;number[i].x!=-1;i++)
+            {
+                if(number[i].id!=number[i-1].id)
+                {
+                    ctx.beginPath();
+                    ctx.moveTo(number[i].x*10,number[i].y*10);
+                    continue;
+                }
+                ctx.lineTo(number[i].x*10,number[i].y*10);
+                ctx.stroke();   
+            }
+        
+    
+    }
+            </script>
+        
+            <body>             
+                <input id="fileInput" type="file" onchange="processFiles()"/>
+                <br>
+                <canvas id="myCanvas" width="1000" height="600" style="border:1px solid #c3c3c3">your browser does not support the canvas tag </canvas>
+                           
+            </body>  
+    </html> 
+    

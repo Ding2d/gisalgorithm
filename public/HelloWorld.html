@@ -4,16 +4,19 @@
         Hello World
     </title>
     <link rel='stylesheet' href='/stylesheet/style.css'/>
-    
-</head>
-    
-    <body>
-        <div>
-            <p>
-               Hello World!
-                </p>
 
-        </div>   
+</head>
+<script>
+function func()
+{
+    var a=document.getElementById('width').value;
+    alert(a);
+}
+</script>
+
+    <body>
+        width:<input id="width" type="text" name="width" > 
+        <input type="button" onclick="func()" value="config">
     </body>
         
         
