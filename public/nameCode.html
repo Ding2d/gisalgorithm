@@ -1,6 +1,10 @@
+<!-- 2017/10/22 21：50 修改建议：看看能不能把画网格的代码提出来写进方法 
+creator:ding2d-->
+
+
 <html>  
         <head>  
-            <title>名称编码</title>  
+            <title>Ding!</title>  
         </head>
         <script>
     
@@ -11,9 +15,10 @@
         this.y=y;
     }
     
-    function processFiles()
+    function processFiles1()
     {
-        var file=document.getElementById("fileInput").files[0];
+       
+        var file=document.getElementById("fileInput1").files[0];
         var reader=new FileReader();
         reader.readAsText(file);
         reader.onload=function(e)
@@ -25,10 +30,32 @@
                number[k]=new co(-1,-1.0,-1.0);  //声明二维，每一个一维数组里面的一个元素都是一个数组；	
             }
     
-            draw(digitalExtraction(str,number));//画图
+            draw1(digitalExtraction(str,number));//画图
         }
         
     }
+
+    function processFiles2()
+    {
+       
+        var file=document.getElementById("fileInput2").files[0];
+        var reader=new FileReader();
+        reader.readAsText(file);
+        reader.onload=function(e)
+        {
+            var str = this.result;//读取文本
+            var number = new Array();
+            for(var k=0;k<100;k++)
+            {    //一维长度为i,i为变量，可以根据实际情况改变
+               number[k]=new co(-1,-1.0,-1.0);  //声明二维，每一个一维数组里面的一个元素都是一个数组；	
+            }
+    
+            draw2(digitalExtraction(str,number));//画图
+        }
+        
+    }
+
+
     //提取数字，并存入数组
     function digitalExtraction(str,number)
     {
@@ -86,13 +113,13 @@
         
         return number;
     }
-    function draw(number)
+    function draw1(number)
     {
-        var canvas=document.getElementById('myCanvas');   
+        var canvas=document.getElementById('myCanvas1');   
         var ctx=canvas.getContext('2d');
         
-        var w = 170;
-        var h = 170;
+        var w = 170*3;
+        var h = 170*3;
         ctx.lineWidth =1;
         ctx.globalCompositeOperation = 'destination-over';
             for( var i = 1; i * 10 <= h; i++ )
@@ -137,6 +164,21 @@
             ctx.moveTo(w,0+10);
             ctx.lineTo(w,h);
             ctx.stroke();
+
+
+            ctx.lineWidth =3;
+            ctx.strokeStyle = "black";
+            ctx.beginPath();
+            ctx.moveTo(255,0+10);
+            ctx.lineTo(255,170*3);
+            ctx.stroke();
+
+            ctx.lineWidth =3;
+            ctx.strokeStyle = "black";
+            ctx.beginPath();
+            ctx.moveTo(0+10,255);
+            ctx.lineTo(170*3,255);
+            ctx.stroke();
     
     
     
@@ -162,13 +204,790 @@
         
     
     }
-            </script>
+
+    function draw2(number)
+    {
+        var canvas=document.getElementById('myCanvas2');   
+        var ctx=canvas.getContext('2d');
+        
+        var w = 170*3;
+        var h = 170*3;
+        ctx.lineWidth =1;
+        ctx.globalCompositeOperation = 'destination-over';
+            for( var i = 1; i * 10 <= h; i++ )
+            {
+              ctx.strokeStyle = "gray";
+              ctx.beginPath();
+              ctx.moveTo(10,i*10);
+              ctx.lineTo(w,i*10);
+              ctx.stroke();
+            }
+            //再画纵线
+            for( var j = 1; j * 10 <= w; j++ )
+            {
+              ctx.strokeStyle = "gray";
+              ctx.beginPath();
+              ctx.moveTo(j*10, 10);
+              ctx.lineTo(j*10, h);
+              ctx.stroke();
+            }
+            //绘制边框
+            ctx.lineWidth =1;
+            ctx.strokeStyle = "black";
+            ctx.beginPath();
+            ctx.moveTo(0+10,0+10);
+            ctx.lineTo(w,0+10);
+            ctx.stroke();
+    
+            ctx.strokeStyle = "black";
+            ctx.beginPath();
+            ctx.moveTo(0+10,0+10);
+            ctx.lineTo(0+10,h);
+            ctx.stroke();
+
+            ctx.strokeStyle = "black";
+            ctx.beginPath();
+            ctx.moveTo(0+10,h);
+            ctx.lineTo(w,h);
+            ctx.stroke();
+
+            ctx.strokeStyle = "black";
+            ctx.beginPath();
+            ctx.moveTo(w,0+10);
+            ctx.lineTo(w,h);
+            ctx.stroke();
+
+
+            ctx.lineWidth =3;
+            ctx.strokeStyle = "black";
+            ctx.beginPath();
+            ctx.moveTo(255,0+10);
+            ctx.lineTo(255,170*3);
+            ctx.stroke();
+
+            ctx.lineWidth =3;
+            ctx.strokeStyle = "black";
+            ctx.beginPath();
+            ctx.moveTo(0+10,255);
+            ctx.lineTo(170*3,255);
+            ctx.stroke();
+    
+    
+    
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = "black";
+            // ctx.beginPath();
+            // ctx.moveTo(1.7*10,4.7*10);
+            // ctx.lineTo(8.1*10,8.7*10);
+            // ctx.stroke();
+            ctx.beginPath();           
+            ctx.moveTo(number[0].x*10,number[0].y*10);
+        for(var i=1;number[i].x!=-1;i++)
+            {
+                if(number[i].id!=number[i-1].id)
+                {
+                    ctx.beginPath();
+                    ctx.moveTo(number[i].x*10,number[i].y*10);
+                    continue;
+                }
+                ctx.lineTo(number[i].x*10,number[i].y*10);
+                ctx.stroke();   
+            }
+        
+    
+    }
+    function clearCanvas1()
+    {
+        var c=document.getElementById('myCanvas1');
+        var cxt=c.getContext('2d');
+
+        c.height=c.height; 
+    }
+    function clearCanvas2()
+    {
+        var c=document.getElementById('myCanvas2');
+        var cxt=c.getContext('2d');
+
+        c.height=c.height; 
+    }
+    function translation()
+    {
+        var v=0,h=0;
+        var t=document.getElementById('target').value;
+        v=parseInt(document.getElementById('vertical').value);
+        h=parseInt(document.getElementById('horizontal').value);
+        if(t=='canvas1')
+        {
+            var canvas=document.getElementById('myCanvas1');   
+            var ctx=canvas.getContext('2d');          
+
+            var file=document.getElementById("fileInput1").files[0];
+            var reader=new FileReader();
+            reader.readAsText(file);
+            reader.onload=function(e)
+            {
+                var str = this.result;
+                var number = new Array();
+                for(var k=0;k<100;k++)
+                {    
+                number[k]=new co(-1,-1.0,-1.0);  	
+                }
+                var temp=digitalExtraction(str,number);
+                for(var k=0;number[k].id!=-1;k++)
+                {   
+                    temp[k].x+=h;
+                    temp[k].y-=v;    
+                }
+        
+                draw1(temp);//画图
+            } 
+        }
+        else
+        {
+            var canvas=document.getElementById('myCanvas2');   
+            var ctx=canvas.getContext('2d');
+            
+
+            var file=document.getElementById("fileInput2").files[0];
+            var reader=new FileReader();
+            reader.readAsText(file);
+            reader.onload=function(e)
+            {
+                var str = this.result;
+                var number = new Array();
+                for(var k=0;k<100;k++)
+                {    
+                number[k]=new co(-1,-1.0,-1.0);  	
+                }
+                var temp=digitalExtraction(str,number);
+                for(var k=0;number[k].id!=-1;k++)
+                {   
+                    temp[k].x+=h;
+                    temp[k].y-=v;    
+                }
+        
+                draw2(temp);//画图
+            } 
+        }
+    }
+
+
+    function restore()
+    {
+        var t=document.getElementById('target').value;
+        if(t=='canvas1')
+        {
+            var canvas=document.getElementById('myCanvas1');   
+            var ctx=canvas.getContext('2d');
+            canvas.height=canvas.height;
+
+            var file=document.getElementById("fileInput1").files[0];
+            var reader=new FileReader();
+            reader.readAsText(file);
+            reader.onload=function(e)
+            {
+                var str = this.result;
+                var number = new Array();
+                for(var k=0;k<100;k++)
+                {    
+                number[k]=new co(-1,-1.0,-1.0);  	
+                }
+                var temp=digitalExtraction(str,number);
+        
+                draw1(temp);//画图
+            } 
+        }
+        else
+        {
+            var canvas=document.getElementById('myCanvas2');   
+            var ctx=canvas.getContext('2d');
+            canvas.height=canvas.height;
+
+            var file=document.getElementById("fileInput2").files[0];
+            var reader=new FileReader();
+            reader.readAsText(file);
+            reader.onload=function(e)
+            {
+                var str = this.result;
+                var number = new Array();
+                for(var k=0;k<100;k++)
+                {    
+                number[k]=new co(-1,-1.0,-1.0);  	
+                }
+                var temp=digitalExtraction(str,number);       
+                draw2(temp);//画图
+            } 
+        }
+    }
+
+    function zoomIn()
+    {
+        var t=document.getElementById('target').value;
+        var times=parseInt(document.getElementById('inParam').value);
+        if(t=='canvas1')
+        {
+            var canvas=document.getElementById('myCanvas1');   
+            var ctx=canvas.getContext('2d');
+            canvas.height=canvas.height;
+
+            var file=document.getElementById("fileInput1").files[0];
+            var reader=new FileReader();
+            reader.readAsText(file);
+            reader.onload=function(e)
+            {
+                var str = this.result;
+                var number = new Array();
+                for(var k=0;k<100;k++)
+                {    
+                number[k]=new co(-1,-1.0,-1.0);  	
+                }
+                var temp=digitalExtraction(str,number);
+                for(var k=0;number[k].id!=-1;k++)
+                {   
+                    temp[k].x=(temp[k].x)*times;
+                    temp[k].y=(temp[k].y)*times;    
+                }
+                draw1(temp);//画图
+            } 
+        }
+        else
+        {
+            var canvas=document.getElementById('myCanvas2');   
+            var ctx=canvas.getContext('2d');
+            canvas.height=canvas.height;
+
+            var file=document.getElementById("fileInput2").files[0];
+            var reader=new FileReader();
+            reader.readAsText(file);
+            reader.onload=function(e)
+            {
+                var str = this.result;
+                var number = new Array();
+                for(var k=0;k<100;k++)
+                {    
+                number[k]=new co(-1,-1.0,-1.0);  	
+                }
+                var temp=digitalExtraction(str,number);
+                for(var k=0;k<100;k++)
+                {   
+                    temp[k].x=(temp[k].x)*times;
+                    temp[k].y=(temp[k].y)*times;    
+                }       
+                draw2(temp);//画图
+            } 
+        }
+    }
+
+    function zoomOut()
+    {
+        var times=parseInt(document.getElementById('outParam').value);
+        var t=document.getElementById('target').value;
+        if(t=='canvas1')
+        {
+            var canvas=document.getElementById('myCanvas1');   
+            var ctx=canvas.getContext('2d');
+            canvas.height=canvas.height;
+
+            var file=document.getElementById("fileInput1").files[0];
+            var reader=new FileReader();
+            reader.readAsText(file);
+            reader.onload=function(e)
+            {
+                var str = this.result;
+                var number = new Array();
+                for(var k=0;k<100;k++)
+                {    
+                number[k]=new co(-1,-1.0,-1.0);  	
+                }
+                var temp=digitalExtraction(str,number);
+                for(var k=0;number[k].id!=-1;k++)
+                {   
+                    temp[k].x=(temp[k].x)/times;
+                    temp[k].y=(temp[k].y)/times;    
+                }
+                draw1(temp);//画图
+            } 
+        }
+        else
+        {
+            var canvas=document.getElementById('myCanvas2');   
+            var ctx=canvas.getContext('2d');
+            canvas.height=canvas.height;
+
+            var file=document.getElementById("fileInput2").files[0];
+            var reader=new FileReader();
+            reader.readAsText(file);
+            reader.onload=function(e)
+            {
+                var str = this.result;
+                var number = new Array();
+                for(var k=0;k<100;k++)
+                {    
+                number[k]=new co(-1,-1.0,-1.0);  	
+                }
+                var temp=digitalExtraction(str,number);
+                for(var k=0;k<100;k++)
+                {   
+                    temp[k].x=(temp[k].x)/times;
+                    temp[k].y=(temp[k].y)/times;    
+                }       
+                draw2(temp);//画图
+            } 
+        }
+    }
+    function rotate()
+    {
+        var angle=parseInt(document.getElementById("angle").value);
+        
+        var t=document.getElementById('target').value;
+        if(t=='canvas1')
+        {
+            var canvas=document.getElementById('myCanvas1');   
+            var ctx=canvas.getContext('2d');         
+
+            var file=document.getElementById("fileInput1").files[0];
+            var reader=new FileReader();
+            reader.readAsText(file);
+            reader.onload=function(e)
+            {
+                var str = this.result;
+                var number = new Array();
+                for(var k=0;k<100;k++)
+                {    
+                number[k]=new co(-1,-1.0,-1.0);  	
+                }
+                var temp=digitalExtraction(str,number);
+
+                var PI=3.141592653;
+                var angle1=angle*(-1);
+                for(var k=0;number[k].id!=-1;k++)
+                {
+                    if(angle>0)
+                    {
+                        var tempX=number[k].x-25.5;
+                        var tempY=25.5-number[k].y;
+                        number[k].x=tempX*Math.cos((-1)*angle*PI/180)-tempY*Math.sin((-1)*angle*PI/180)+25.5;
+                        number[k].y=25.5-(tempX*Math.sin((-1)*angle*PI/180)+tempY*Math.cos((-1)*angle*PI/180));
+                    }
+                    else
+                    {
+                       
+                        var tempX=number[k].x-25.5;
+                        var tempY=25.5-number[k].y;
+                        number[k].x=tempX*Math.cos(angle1*PI/180)-tempY*Math.sin(angle1*PI/180)+25.5;
+                        number[k].y=25.5-(tempX*Math.sin(angle1*PI/180)+tempY*Math.cos(angle1*PI/180));
+                    }
+
+                }
+
+                draw1(temp);//画图
+            } 
+        }
+        else
+        {
+            var canvas=document.getElementById('myCanvas2');   
+            var ctx=canvas.getContext('2d');
+
+            var file=document.getElementById("fileInput2").files[0];
+            var reader=new FileReader();
+            reader.readAsText(file);
+            reader.onload=function(e)
+            {
+                var str = this.result;
+                var number = new Array();
+                for(var k=0;k<100;k++)
+                {    
+                number[k]=new co(-1,-1.0,-1.0);  	
+                }
+                var temp=digitalExtraction(str,number);
+
+                var PI=3.141592653;
+                var angle1=angle*(-1);
+                for(var k=0;number[k].id!=-1;k++)
+                {
+                    if(angle>0)
+                    {
+                        var tempX=number[k].x-25.5;
+                        var tempY=25.5-number[k].y;
+                        number[k].x=tempX*Math.cos((-1)*angle*PI/180)-tempY*Math.sin((-1)*angle*PI/180)+25.5;
+                        number[k].y=25.5-(tempX*Math.sin((-1)*angle*PI/180)+tempY*Math.cos((-1)*angle*PI/180));
+                    }
+                    else
+                    {
+                       
+                        var tempX=number[k].x-25.5;
+                        var tempY=25.5-number[k].y;
+                        number[k].x=tempX*Math.cos(angle1*PI/180)-tempY*Math.sin(angle1*PI/180)+25.5;
+                        number[k].y=25.5-(tempX*Math.sin(angle1*PI/180)+tempY*Math.cos(angle1*PI/180));
+                    }
+
+                }
+
+
+                draw2(temp);//画图
+            } 
+        }
+
+
+    }
+
+    function symmetry()
+    {
+        var t=document.getElementById('target').value;
+        var type=parseInt(document.getElementById('stype').value);
+
+        if(t=='canvas1')
+        {
+            var canvas=document.getElementById('myCanvas1');   
+            var ctx=canvas.getContext('2d');
+
+            var file=document.getElementById("fileInput1").files[0];
+            var reader=new FileReader();
+            reader.readAsText(file);
+            reader.onload=function(e)
+            {
+                var str = this.result;
+                var number = new Array();
+                for(var k=0;k<100;k++)
+                {    
+                number[k]=new co(-1,-1.0,-1.0);  	
+                }
+                var temp=digitalExtraction(str,number);
+                
+                switch(type)
+                {
+                    case 1:
+                    for(var k=0;number[k].id!=-1;k++)
+                    {
+                        var tempX=number[k].x-25.5;
+                        number[k].x=25.5-tempX;
+                    }
+                    break;
+                    case 2:
+                        for(var k=0;number[k].id!=-1;k++)
+                        {                      
+                            var tempY=25.5-number[k].y;
+                            number[k].y=25.5+tempY;
+                        }
+
+                    break;
+                    case 3:
+                        for(var k=0;number[k].id!=-1;k++)
+                        {
+                            var tempX=number[k].x-25.5;
+                            var tempY=25.5-number[k].y;
+
+                            number[k].x=25.5+tempY;
+                            number[k].y=25.5-tempX;
+                        }                  
+
+                    break;
+                    case 4:
+                        for(var k=0;number[k].id!=-1;k++)
+                        {
+                            var tempX=number[k].x-25.5;
+                            var tempY=25.5-number[k].y;
+
+                            number[k].x=25.5-tempY;
+                            number[k].y=25.5+tempX;
+                        }    
+
+                    break;
+                    case 5:
+                        for(var k=0;number[k].id!=-1;k++)
+                        {
+                            var tempX=number[k].x-25.5;
+                            var tempY=25.5-number[k].y;
+
+                            number[k].x=25.5-tempX;
+                            number[k].y=25.5+tempY;
+                        }    
+                    break;
+                    default:
+                    break;                    
+                }
+               draw1(temp);//画图
+            } 
+        }
+        else
+        {
+            var canvas=document.getElementById('myCanvas2');   
+            var ctx=canvas.getContext('2d');
+
+            var file=document.getElementById("fileInput2").files[0];
+            var reader=new FileReader();
+            reader.readAsText(file);
+            reader.onload=function(e)
+            {
+                var str = this.result;
+                var number = new Array();
+                for(var k=0;k<100;k++)
+                {    
+                number[k]=new co(-1,-1.0,-1.0);  	
+                }
+                var temp=digitalExtraction(str,number);
+
+                switch(type)
+                {
+                    case 1:
+                    for(var k=0;number[k].id!=-1;k++)
+                    {
+                        var tempX=number[k].x-25.5;
+                        number[k].x=25.5-tempX;
+                    }
+                    break;
+                    case 2:
+                        for(var k=0;number[k].id!=-1;k++)
+                        {                      
+                            var tempY=25.5-number[k].y;
+                            number[k].y=25.5+tempY;
+                        }
+
+                    break;
+                    case 3:
+                        for(var k=0;number[k].id!=-1;k++)
+                        {
+                            var tempX=number[k].x-25.5;
+                            var tempY=25.5-number[k].y;
+
+                            number[k].x=25.5+tempY;
+                            number[k].y=25.5-tempX;
+                        }                  
+
+                    break;
+                    case 4:
+                        for(var k=0;number[k].id!=-1;k++)
+                        {
+                            var tempX=number[k].x-25.5;
+                            var tempY=25.5-number[k].y;
+
+                            number[k].x=25.5-tempY;
+                            number[k].y=25.5+tempX;
+                        }    
+
+                    break;
+                    case 5:
+                        for(var k=0;number[k].id!=-1;k++)
+                        {
+                            var tempX=number[k].x-25.5;
+                            var tempY=25.5-number[k].y;
+
+                            number[k].x=25.5-tempX;
+                            number[k].y=25.5+tempY;
+                        }    
+                    break;
+                    default:
+                    break;                    
+                }
+
+
+                draw2(temp);//画图
+            } 
+        }
+    }
+
+    function leftShear()
+    {
+        var t=document.getElementById('target').value;
+        var degree=parseFloat(document.getElementById('degree').value);
+        if(t=='canvas1')
+        {
+            var canvas=document.getElementById('myCanvas1');   
+            var ctx=canvas.getContext('2d');
+           
+
+            var file=document.getElementById("fileInput1").files[0];
+            var reader=new FileReader();
+            reader.readAsText(file);
+            reader.onload=function(e)
+            {
+                var str = this.result;
+                var number = new Array();
+                for(var k=0;k<100;k++)
+                {    
+                number[k]=new co(-1,-1.0,-1.0);  	
+                }
+                var temp=digitalExtraction(str,number);
+        
+                for(var k=0;number[k].id!=-1;k++)
+                {
+                    var tempX=number[k].x-25.5;
+                    var tempY=25.5-number[k].y;
+                    number[k].x=tempX+degree*tempY+25.5;
+                    
+                }
+
+
+                draw1(temp);//画图
+            } 
+        }
+        else
+        {
+            var canvas=document.getElementById('myCanvas2');   
+            var ctx=canvas.getContext('2d');
+            
+
+            var file=document.getElementById("fileInput2").files[0];
+            var reader=new FileReader();
+            reader.readAsText(file);
+            reader.onload=function(e)
+            {
+                var str = this.result;
+                var number = new Array();
+                for(var k=0;k<100;k++)
+                {    
+                number[k]=new co(-1,-1.0,-1.0);  	
+                }
+                var temp=digitalExtraction(str,number);     
+
+                for(var k=0;number[k].id!=-1;k++)
+                {
+                    var tempX=number[k].x-25.5;
+                    var tempY=25.5-number[k].y;
+                    number[k].x=tempX+degree*tempY+25.5;
+                    
+                }
+
+                draw2(temp);//画图
+            } 
+        }
+    }
+
+    function upShear()
+    {
+        var t=document.getElementById('target').value;
+        var degree=parseFloat(document.getElementById('degree').value);
+        if(t=='canvas1')
+        {
+            var canvas=document.getElementById('myCanvas1');   
+            var ctx=canvas.getContext('2d');
+            
+
+            var file=document.getElementById("fileInput1").files[0];
+            var reader=new FileReader();
+            reader.readAsText(file);
+            reader.onload=function(e)
+            {
+                var str = this.result;
+                var number = new Array();
+                for(var k=0;k<100;k++)
+                {    
+                number[k]=new co(-1,-1.0,-1.0);  	
+                }
+                var temp=digitalExtraction(str,number);
+        
+                for(var k=0;number[k].id!=-1;k++)
+                {
+                    var tempX=number[k].x-25.5;
+                    var tempY=25.5-number[k].y;
+                    number[k].y=25.5-(degree*tempX+tempY);
+                    
+                }
+
+
+                draw1(temp);//画图
+            } 
+        }
+        else
+        {
+            var canvas=document.getElementById('myCanvas2');   
+            var ctx=canvas.getContext('2d');
+           
+
+            var file=document.getElementById("fileInput2").files[0];
+            var reader=new FileReader();
+            reader.readAsText(file);
+            reader.onload=function(e)
+            {
+                var str = this.result;
+                var number = new Array();
+                for(var k=0;k<100;k++)
+                {    
+                number[k]=new co(-1,-1.0,-1.0);  	
+                }
+                var temp=digitalExtraction(str,number);     
+
+                for(var k=0;number[k].id!=-1;k++)
+                {
+                    var tempX=number[k].x-25.5;
+                    var tempY=25.5-number[k].y;
+                    number[k].y=25.5-(degree*tempX+tempY);
+                    
+                }
+
+                draw2(temp);//画图
+            } 
+        }
+    }
+
+</script>
         
             <body>             
-                <input id="fileInput" type="file" onchange="processFiles()"/>
+                <input id="fileInput1" type="file" onchange="processFiles1()"/>
+                
+                <input id="fileInput2" type="file" onchange="processFiles2()"/>
+                
                 <br>
-                <canvas id="myCanvas" width="1000" height="600" style="border:1px solid #c3c3c3">your browser does not support the canvas tag </canvas>
-                           
+                <canvas id="myCanvas1" width="600" height="600" style="border:1px solid #747272">your browser does not support the canvas tag </canvas>
+                <canvas id="myCanvas2" width="600" height="600" style="border:1px solid #747272">your browser does not support the canvas tag </canvas>
+                <br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="submit" onclick="clearCanvas1()" value="clear1">
+                &nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="submit" onclick="clearCanvas2()" value="clear2">
+
+                <br>
+                请选择变换目标:
+                <select name="" id="target"> 
+                    <option value="canvas1">canvas1</option> 
+                    <option value="canvas2">canvas2</option> 
+                </select> 
+                <hr>
+                平移变化<br>
+                x:<input id="horizontal" type="text" name="horizontal" ><br>
+                y:<input id="vertical" type="text" name="vertical" >
+                <br>
+                记左移为负，右移为正。上移为正，下移为负。
+                <input type="button" onclick="translation()" value="GO!">
+                <input type="button" onclick="restore()" value="复位">
+                <hr>
+                比例变化<br>
+                <input type="button" onclick="zoomIn()" value="放大">
+                <input id="inParam" type="text">倍<br>
+                <input type="button" onclick="zoomOut()" value="缩小">
+                <input id="outParam" type="text">倍
+                <input type="button" onclick="restore()" value="复位">
+                <hr>
+                旋转变换
+                <br>
+                记顺时针为正，逆时针为负。请输入旋转度数：
+                <input id="angle" type="text" name="angle" >
+                <input type="button" onclick="rotate()" value="GO!">
+                <input type="button" onclick="restore()" value="复位">
+                <hr>
+                对称变换<br>
+                <select name="" id="stype"> 
+                    <option value="1">关于y轴对称</option> 
+                    <option value="2">关于x轴对称</option> 
+                    <option value="3">关于y=x轴对称</option> 
+                    <option value="4">关于y=-x轴对称</option>
+                    <option value="5">关于原点轴对称</option> 
+                </select> 
+                <input type="button" onclick="symmetry()" value="GO!">
+                <input type="button" onclick="restore()" value="复位">
+                <hr>
+                对于左斜变换：记正系数为向右斜，负系数为向左斜。对于耸肩变换：记正系数为向下斜，负系数为向上斜。<br>
+                设置倾斜系数：<input id="degree" type="text" name="degree" ><br>
+                左斜变换：<input type="button" onclick="leftShear()" value="GO!">              
+                耸肩变换：<input type="button" onclick="upShear()" value="GO!">
+                <input type="button" onclick="restore()" value="复位">
+                <hr>
+
+
             </body>  
     </html> 
     
