@@ -1,0 +1,699 @@
+<html>
+    <head>
+        <title>
+            MapProjection BY.Ding!
+        </title>
+        <link rel='stylesheet' href='/stylesheet/style.css'/>
+    
+    </head>
+    <script>
+    function co(id,x,y)
+    {
+        this.id=id;
+        this.x=x;
+        this.y=y;
+    }
+
+  function mainFun()
+    {
+        var canvas=document.getElementById('myCanvas');   
+        var ctx=canvas.getContext('2d');
+        canvas.height=canvas.height;
+       
+        var fun=parseInt(document.getElementById("type").value);
+        var file=document.getElementById("fileInput").files[0];
+        var reader=new FileReader();
+        reader.readAsText(file);
+        reader.onload=function(e)
+        {
+            var str = this.result;//读取文本
+            var number = new Array();
+            for(var k=0;k<26800;k++)
+            {    //一维长度为i,i为变量，可以根据实际情况改变
+               number[k]=new co(-1,-1.0,-1.0);  //声明二维，每一个一维数组里面的一个元素都是一个数组；	
+            }
+    
+            number=digitalExtraction(str,number);
+            switch(fun)
+            {
+                case 1:
+                drawChinaMap(number);
+                break;
+                case 2:
+                lambert(number);
+                break;
+                case 3:
+                Mercator(number);
+                break;
+                case 4:
+                drawWorldMap(number);
+                break;
+                case 5:
+                MercatorWorld(number);
+                break;
+                default:break;
+            }
+
+        }
+        
+    }
+    function digitalExtraction(str,number)
+    {
+        
+        var heap= str.replace(/[^0-9.,-LEND]/ig,"B");
+        var numcharacter="";//存储数字字符
+        var line;
+              
+        var index=0;//数组id
+        var flag=3;//heap字符串当前标记
+        var n=0;//标识数字与字符转换位置
+        var character=heap[flag];//获取字符串的一个字符
+        number[0].id=1;
+
+        while(character!=null)
+        {
+            if(character=="E")
+            {
+                if(heap[flag+5]=="E")
+                    break;
+                flag+=5;
+                character=heap[flag];
+                while(character!="B")
+                {
+                    numcharacter+=character;
+                    flag++;
+                    character=heap[flag];
+                }
+                number[index].id=parseFloat(numcharacter);
+                numcharacter="";
+                flag+=2;
+                character=heap[flag];
+            }
+            else if(character=="B")
+            {
+                number[index].y=parseFloat(numcharacter);
+                flag+=2;
+                character=heap[flag];
+                numcharacter="";
+                index++;
+                continue;
+               
+            }
+            else if(character==",")
+            {
+                number[index].x=parseFloat(numcharacter);
+                if(number[index].id==-1)
+                    number[index].id=number[index-1].id;
+                character=heap[++flag];
+                numcharacter="";
+                continue;
+            }
+            else
+            {
+                numcharacter+=character;
+                character=heap[++flag];
+                continue;
+            }
+        }
+        return number;
+    }
+
+    function lambert(number)
+    {
+      
+        var grid=generateGrid();
+        var m,m1,m2;
+        var n;
+        var t,t1,t2;
+        var F;
+        var O;
+        var r0,r;
+        var L,L0;
+        var a,b,e;
+        var B0,B1,B2;
+        var pi=Math.PI;
+           
+        a=6378245; b=6356863.01877;  e=Math.sqrt(a*a-b*b)/a; 
+        B0=0;  B1=20;  B2=40;  L0=105;
+        m1=Math.cos(B1*pi/180)/Math.sqrt(1-e*e*Math.sin(B1*pi/180)*Math.sin(B1*pi/180));
+        m2=Math.cos(B2*pi/180)/Math.sqrt(1-e*e*Math.sin(B2*pi/180)*Math.sin(B2*pi/180));
+        t1=Math.tan(pi/4-B1*pi/360)/Math.pow((1-e*Math.sin(B1*pi/180))/(1-e*Math.sin(B1*pi/180)),e/2);
+        t2=Math.tan(pi/4-B2*pi/360)/Math.pow((1-e*Math.sin(B2*pi/180))/(1-e*Math.sin(B2*pi/180)),e/2);
+        n=Math.log(m1/m2)/Math.log(t1/t2);
+        F=m1/(n*Math.pow(t1,n));
+        r0=a*F;
+
+
+        var minX=grid[0].x,minY=grid[0].y,maxX=grid[0].x,maxY=grid[0].y;
+        var centerX,centerY;
+        for(var i=0;i<grid.length&&grid[i].id!=-1;i++)
+        {
+            L=grid[i].x;
+            B=grid[i].y;
+            t=Math.tan(pi/4-B*pi/360)/Math.pow((1-e*Math.sin(B*pi/180))/(1-e*Math.sin(B*pi/180)),e/2);
+            r=a*F*Math.pow(t,n);
+            O=n*(L-L0);
+
+            grid[i].x=r0-r*Math.cos(O*pi/180);
+            grid[i].y=r*Math.sin(O*pi/180);
+
+            if(grid[i].x>maxX)
+            maxX=grid[i].x;
+            if(grid[i].y>maxY)
+            maxY=grid[i].y;
+            if(grid[i].x<minX)
+            minX=grid[i].x;
+            if(grid[i].y<minY)
+            minY=grid[i].y;
+        }
+
+        centerX=(minX+maxX)/2;
+        centerY=(minY+maxY)/2;
+
+        for(var i=0;i<grid.length&&grid[i].id!=-1;i++)
+        {
+            grid[i].x=(grid[i].x-centerX)/10000;
+            grid[i].y=grid[i].y/10000;
+        }
+
+        for(var i=0;i<number.length&&number[i].id!=-1;i++)
+        {
+            L=number[i].x;
+            B=number[i].y;
+      
+           
+            t=Math.tan(pi/4-B*pi/360)/Math.pow((1-e*Math.sin(B*pi/180))/(1-e*Math.sin(B*pi/180)),e/2);
+            r=a*F*Math.pow(t,n);
+            O=n*(L-L0);
+
+            number[i].x=r0-r*Math.cos(O*pi/180)-centerX;
+            number[i].x=number[i].x/10000;
+            number[i].y=r*Math.sin(O*pi/180);
+            number[i].y=number[i].y/10000;
+        }
+        
+
+        var canvas=document.getElementById('myCanvas');   
+        var ctx=canvas.getContext('2d');
+
+        ctx.beginPath();
+        var tempX,tempY;
+    
+        tempX=number[0].y+500;
+        tempY=400-number[0].x;                
+        ctx.moveTo(tempX,tempY);
+        for(var i=1;number[i].x!=-1;i++)
+        {
+            if(number[i].id!=number[i-1].id)
+            {
+                ctx.beginPath();       
+               
+                tempX=number[i].y+500;
+                tempY=400-number[i].x;      
+                ctx.moveTo(tempX,tempY);
+                continue;
+            }
+        
+           
+            tempX=number[i].y+500;
+            tempY=400-number[i].x; 
+            ctx.lineTo(tempX,tempY);
+            ctx.stroke();   
+        }
+
+        ctx.beginPath();
+        tempX=grid[0].y+500;
+        tempY=400-grid[0].x;            
+        ctx.moveTo(tempX,tempY);
+        for(var i=1;grid[i].id!=-1;i++)
+        {
+            if(grid[i].id!=grid[i-1].id)
+            {
+                ctx.beginPath();
+                tempX=grid[i].y+500;
+                tempY=400-grid[i].x;
+                ctx.moveTo(tempX,tempY);
+                continue;
+            }
+            tempX=grid[i].y+500;
+            tempY=400-grid[i].x;
+            ctx.lineTo(tempX,tempY);
+
+            ctx.stroke();   
+            
+        }
+
+
+    }
+
+    function Mercator(number)
+    {
+        var grid=generateGrid();
+        var K;
+        var B0,B;
+        var a,b,e,e1;
+        var L,L0;
+        var X;
+        var Y;             
+       
+        
+        B0=0;
+        a=6378245;  b=6356863.01877;   
+        e=Math.sqrt((a*a-b*b)/(a*a)); e1=Math.sqrt((a*a-b*b)/(b*b));
+        L0=0;
+        K=((a*a/b)/(Math.sqrt(1+e1*e1*Math.cos(B0*Math.PI/180)*Math.cos(B0*Math.PI/180))))*Math.cos(B0*Math.PI/180);
+      
+        var minX=grid[0].x,minY=grid[0].y,maxX=grid[0].x,maxY=grid[0].y;
+        var centerX,centerY;
+        for(var i=0;i<grid.length&&grid[i].id!=-1;i++)
+        {
+            L=grid[i].x;
+            B=grid[i].y;
+            grid[i].y=K*(L-L0);
+            grid[i].x=K*Math.log(Math.tan(Math.PI/4+B*Math.PI/360)*Math.pow((1-(e*Math.sin(B*Math.PI/180)))/(1+(e*Math.sin(B*Math.PI/180))),e/2));
+          
+            if(grid[i].x>maxX)
+            maxX=grid[i].x;
+            if(grid[i].y>maxY)
+            maxY=grid[i].y;
+            if(grid[i].x<minX)
+            minX=grid[i].x;
+            if(grid[i].y<minY)
+            minY=grid[i].y;
+        }
+        
+        centerX=(minX+maxX)/2;
+        centerY=(minY+maxY)/2;
+
+        for(var i=0;i<grid.length&&grid[i].id!=-1;i++)
+        {
+            grid[i].x=(grid[i].x-centerX)/12500;
+            grid[i].y=(grid[i].y-centerY)/500000;
+        }
+
+        for(var i=0;i<number.length&&number[i].id!=-1;i++)
+        {
+                                  
+            L=number[i].x;
+            B=number[i].y;
+            number[i].y=K*(L-L0);
+            number[i].x=K*Math.log(Math.tan(Math.PI/4+B*Math.PI/360)*Math.pow((1-(e*Math.sin(B*Math.PI/180)))/(1+(e*Math.sin(B*Math.PI/180))),e/2));
+            number[i].x=(number[i].x-centerX)/12500;
+            number[i].y=(number[i].y-centerY)/500000;
+         
+        }
+
+        var canvas=document.getElementById('myCanvas');   
+        var ctx=canvas.getContext('2d');
+
+        ctx.beginPath();
+        var tempX,tempY;
+    
+        // tempX=number[0].y+500;
+        tempX=number[0].y;
+        tempY=400-number[0].x;                
+        ctx.moveTo(tempX,tempY);
+        for(var i=1;number[i].x!=-1;i++)
+        {
+            if(number[i].id!=number[i-1].id)
+            {
+                ctx.beginPath();       
+               
+                // tempX=number[i].y+500;
+                tempX=number[i].y
+                tempY=400-number[i].x;      
+                ctx.moveTo(tempX,tempY);
+                continue;
+            }
+            // tempX=number[i].y+500;
+            tempX=number[i].y
+            tempY=400-number[i].x; 
+            ctx.lineTo(tempX,tempY);
+            ctx.stroke();   
+        }
+
+        ctx.beginPath();
+        tempX=grid[0].y;
+        tempY=400-grid[0].x;            
+        ctx.moveTo(tempX,tempY);
+        for(var i=1;grid[i].id!=-1;i++)
+        {
+            if(grid[i].id!=grid[i-1].id)
+            {
+                ctx.beginPath();
+                tempX=grid[i].y;
+                tempY=400-grid[i].x;
+                ctx.moveTo(tempX,tempY);
+                continue;
+            }
+            tempX=grid[i].y;
+            tempY=400-grid[i].x;
+            ctx.lineTo(tempX,tempY);
+
+            ctx.stroke();   
+            
+        }
+
+    }
+
+    function generateGrid()
+    {
+        var count=0;
+        var index=1;
+        var grid = new Array();
+        for(var k=0;k<800;k++)
+        {    //一维长度为i,i为变量，可以根据实际情况改变
+            grid[k]=new co(-1,-1.0,-1.0);  //声明二维，每一个一维数组里面的一个元素都是一个数组；	
+        }
+        
+        for(var k=70;k<145;k=k+5)
+        {             
+     
+                    for(var m=0;m<60;m=m+5)
+                {             
+                    grid[count].x=k;
+                    grid[count].y=m;
+                    grid[count].id=index;
+                    count++;
+
+                    grid[count].x=k;
+                    grid[count].y=m+5;
+                    grid[count].id=index;
+                    count++;
+                    index++;
+                }
+
+        }
+        for(var m=0;m<=60;m=m+5)
+        {             
+              
+                    for(var k=70;k<=135;k=k+5)
+                {             
+                    grid[count].x=k;
+                    grid[count].y=m;
+                    grid[count].id=index;
+                    count++;
+
+                    grid[count].x=k+5;
+                    grid[count].y=m;
+                    grid[count].id=index;
+                    count++;
+                    index++;
+                }
+
+        }
+        return grid;
+
+    }
+
+    function generateWorldGrid()
+    {
+        var count=0;
+        var index=1;
+        var grid = new Array();
+        for(var k=0;k<15000;k++)
+        {    //一维长度为i,i为变量，可以根据实际情况改变
+            grid[k]=new co(-1,-1.0,-1.0);  //声明二维，每一个一维数组里面的一个元素都是一个数组；	
+        }
+        
+        for(var k=-180;k<=180;k=k+5)
+        {             
+     
+                    for(var m=-85;m<85;m=m+5)
+                {             
+                    grid[count].x=k;
+                    grid[count].y=m;
+                    grid[count].id=index;
+                    count++;
+
+                    grid[count].x=k;
+                    grid[count].y=m+5;
+                    grid[count].id=index;
+                    count++;
+                    index++;
+                }
+
+        }
+        for(var m=-85;m<=85;m=m+5)
+        {             
+              
+                    for(var k=-180;k<=175;k=k+5)
+                {             
+                    grid[count].x=k;
+                    grid[count].y=m;
+                    grid[count].id=index;
+                    count++;
+
+                    grid[count].x=k+5;
+                    grid[count].y=m;
+                    grid[count].id=index;
+                    count++;
+                    index++;
+                }
+
+        }
+        return grid;
+
+    }
+    function drawChinaMap(number)
+    {
+    
+        var grid = generateGrid();
+
+        var canvas=document.getElementById('myCanvas');   
+        var ctx=canvas.getContext('2d');
+
+        ctx.beginPath();
+        var tempX,tempY;
+        tempX=(number[0].x-105)*10+500;
+        tempY=400-(number[0].y-30)*10;              
+        ctx.moveTo(tempX,tempY);
+        for(var i=1;number[i].x!=-1;i++)
+        {
+            if(number[i].id!=number[i-1].id)
+            {
+                ctx.beginPath();       
+                tempX=(number[i].x-105)*10+500;
+                tempY=400-(number[i].y-30)*10;   
+                ctx.moveTo(tempX,tempY);
+                continue;
+            }
+        
+            tempX=(number[i].x-105)*10+500;
+            tempY=400-(number[i].y-30)*10;   
+            ctx.lineTo(tempX,tempY);
+            ctx.stroke();   
+        }
+
+        ctx.beginPath();
+        tempX=(grid[0].x-105)*10+500;
+        tempY=400-(grid[0].y-30)*10;            
+        ctx.moveTo(tempX,tempY);
+        for(var i=1;grid[i].x!=-1;i++)
+        {
+            if(grid[i].id!=grid[i-1].id)
+            {
+                ctx.beginPath();
+                tempX=(grid[i].x-105)*10+500;
+                tempY=400-(grid[i].y-30)*10;
+                ctx.moveTo(tempX,tempY);
+                continue;
+            }
+            tempX=(grid[i].x-105)*10+500;
+            tempY=400-(grid[i].y-30)*10;
+            ctx.lineTo(tempX,tempY);
+
+            ctx.stroke();   
+            
+        }
+
+    
+    }
+  
+    function MercatorWorld(number)
+    {
+        
+        var grid=generateWorldGrid();
+        var K;
+        var B0,B;
+        var a,b,e,e1;
+        var L,L0;
+        var X;
+        var Y;             
+       
+        
+        B0=0;
+        a=6378245;  b=6356863.01877;   
+        e=Math.sqrt((a*a-b*b)/(a*a)); e1=Math.sqrt((a*a-b*b)/(b*b));
+        L0=0;
+        K=((a*a/b)/(Math.sqrt(1+e1*e1*Math.cos(B0*Math.PI/180)*Math.cos(B0*Math.PI/180))))*Math.cos(B0*Math.PI/180);
+      
+        var minX=grid[0].x,minY=grid[0].y,maxX=grid[0].x,maxY=grid[0].y;
+        var centerX,centerY;
+        for(var i=0;i<grid.length&&grid[i].id!=-1;i++)
+        {
+            L=grid[i].x;
+            B=grid[i].y;
+            grid[i].y=K*(L-L0);
+            grid[i].x=K*Math.log(Math.tan(Math.PI/4+B*Math.PI/360)*Math.pow((1-(e*Math.sin(B*Math.PI/180)))/(1+(e*Math.sin(B*Math.PI/180))),e/2));
+            if(grid[i].x<-238068937)
+            x=-238068937;
+            if(grid[i].x>maxX)
+            maxX=grid[i].x;
+            if(grid[i].y>maxY)
+            maxY=grid[i].y;
+            if(grid[i].x<minX)
+            minX=grid[i].x;
+            if(grid[i].y<minY)
+            minY=grid[i].y;
+        }
+        
+        centerX=(minX+maxX)/2;
+        centerY=(minY+maxY)/2;
+
+        for(var i=0;i<grid.length&&grid[i].id!=-1;i++)
+        {
+            grid[i].x=(grid[i].x-centerX)/100000;
+            grid[i].y=(grid[i].y-centerY)/3000000;
+        }
+
+        for(var i=0;i<number.length&&number[i].id!=-1;i++)
+        {
+                                  
+            L=number[i].x;
+            B=number[i].y;
+            number[i].y=K*(L-L0);
+            number[i].x=K*Math.log(Math.tan(Math.PI/4+B*Math.PI/360)*Math.pow((1-(e*Math.sin(B*Math.PI/180)))/(1+(e*Math.sin(B*Math.PI/180))),e/2));
+            number[i].x=(number[i].x-centerX)/100000;
+            number[i].y=(number[i].y-centerY)/3000000;
+         
+        }
+
+        var canvas=document.getElementById('myCanvas');   
+        var ctx=canvas.getContext('2d');
+
+        ctx.beginPath();
+        var tempX,tempY;
+    
+        tempX=number[0].y+500;
+        //tempX=number[0].y;
+        tempY=400-number[0].x;                
+        ctx.moveTo(tempX,tempY);
+        for(var i=1;number[i].x!=-1;i++)
+        {
+            if(number[i].id!=number[i-1].id)
+            {
+                ctx.beginPath();       
+               
+               tempX=number[i].y+500;
+                //tempX=number[i].y
+                tempY=400-number[i].x;      
+                ctx.moveTo(tempX,tempY);
+                continue;
+            }
+          tempX=number[i].y+500;
+            //tempX=number[i].y
+            tempY=400-number[i].x; 
+            ctx.lineTo(tempX,tempY);
+            ctx.stroke();   
+        }
+
+        ctx.beginPath();
+        tempX=grid[0].y+500;
+        tempY=400-grid[0].x;            
+        ctx.moveTo(tempX,tempY);
+        for(var i=1;grid[i].id!=-1;i++)
+        {
+            if(grid[i].id!=grid[i-1].id)
+            {
+                ctx.beginPath();
+                tempX=grid[i].y+500;
+                tempY=400-grid[i].x;
+                ctx.moveTo(tempX,tempY);
+                continue;
+            }
+            tempX=grid[i].y+500;
+            tempY=400-grid[i].x;
+            ctx.lineTo(tempX,tempY);
+
+            ctx.stroke();   
+            
+        }
+
+     
+    }
+
+    function drawWorldMap(number)
+    {
+        
+        var grid = generateWorldGrid();
+
+        var canvas=document.getElementById('myCanvas');   
+        var ctx=canvas.getContext('2d');
+
+        ctx.beginPath();
+        var tempX,tempY;
+        tempX=(number[0].x)*2.5+500;
+        tempY=400-(number[0].y)*2.5;              
+        ctx.moveTo(tempX,tempY);
+        for(var i=1;number[i].x!=-1;i++)
+        {
+            if(number[i].id!=number[i-1].id)
+            {
+                ctx.beginPath();       
+                tempX=(number[i].x)*2.5+500;
+                tempY=400-(number[i].y)*2.5;   
+                ctx.moveTo(tempX,tempY);
+                continue;
+            }
+        
+            tempX=(number[i].x)*2.5+500;
+            tempY=400-(number[i].y)*2.5;   
+            ctx.lineTo(tempX,tempY);
+            ctx.stroke();   
+        }
+
+        ctx.beginPath();
+        tempX=grid[0].x*2.5+500;
+        tempY=400-grid[0].y*2.5;            
+        ctx.moveTo(tempX,tempY);
+        for(var i=1;grid[i].x!=-1;i++)
+        {
+            if(grid[i].id!=grid[i-1].id)
+            {
+                ctx.beginPath();
+                tempX=grid[i].x*2.5+500;
+                tempY=400-grid[i].y*2.5;
+                ctx.moveTo(tempX,tempY);
+                continue;
+            }
+            tempX=grid[i].x*2.5+500;
+            tempY=400-grid[i].y*2.5;
+            ctx.lineTo(tempX,tempY);
+
+            ctx.stroke();   
+            
+        }
+
+    }
+
+
+
+    </script>
+    
+        <body>
+                <input id="fileInput" type="file" >
+                <select name="" id="type"> 
+                    <option value="1">中国地图</option> 
+                    <option value="2">中国地图兰勃特投影</option> 
+                    <option value="3">中国地图墨卡托投影</option> 
+                    <option value="4">世界地图</option>
+                    <option value="5">世界地图墨卡托投影</option> 
+                </select>
+                <input type="button" onclick="mainFun()" value="GO!"> <br>
+                <canvas id="myCanvas" width="1000" height="800" style="border:1px solid #747272">your browser does not support the canvas tag </canvas>
+                
+        </body>
+            
+            
+    </html>
