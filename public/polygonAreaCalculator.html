@@ -1,0 +1,208 @@
+<html>
+    <head>
+        <title>
+            MapAreaCalculator BY.Ding!
+        </title>
+        <link rel='stylesheet' href='/stylesheet/style.css'/>
+    
+    </head>
+    <script>
+    function co(id,x,y)
+    {
+        this.id=id;
+        this.x=x;
+        this.y=y;
+    }
+
+    function mainFun()
+    {
+        var canvas=document.getElementById('myCanvas');   
+        var ctx=canvas.getContext('2d');
+        canvas.height=canvas.height;
+       
+        // var fun=parseInt(document.getElementById("type").value);
+        var file=document.getElementById("fileInput").files[0];
+        var reader=new FileReader();
+        reader.readAsText(file);
+        reader.onload=function(e)
+        {
+            var str = this.result;//读取文本
+            var number = new Array();
+            for(var k=0;k<63000;k++)
+            {    //一维长度为i,i为变量，可以根据实际情况改变
+               number[k]=new co(-1,-1.0,-1.0);  //声明二维，每一个一维数组里面的一个元素都是一个数组；	
+            }
+    
+            number=digitalExtraction(str,number);
+            // switch(fun)
+            // {
+            //     case 1:
+            //     draw(number);
+            //     break;
+            //     case 2:
+            //     lambert(number);
+            // }
+            draw(number);
+        }
+        
+    }
+    function digitalExtraction(str,number)
+    {
+        
+        var heap= str.replace(/[^0-9.,-LEND]/ig,"B");
+        var numcharacter="";//存储数字字符
+        var line;
+              
+        var index=0;//数组id
+        var flag=3;//heap字符串当前标记
+        var n=0;//标识数字与字符转换位置
+        var character=heap[flag];//获取字符串的一个字符
+        number[0].id=1;
+
+        while(character!=null)
+        {
+            if(character=="E")
+            {
+                if(heap[flag+5]=="E")
+                    break;
+                flag+=5;
+                character=heap[flag];
+                while(character!="B")
+                {
+                    numcharacter+=character;
+                    flag++;
+                    character=heap[flag];
+                }
+                //number[index]=-1;
+                number[index].id=number[index-1].id+1;
+                numcharacter="";
+                flag+=2;
+                character=heap[flag];
+            }
+            else if(character=="B")
+            {
+                number[index].y=parseFloat(numcharacter);
+               // number[index]=parseFloat(numcharacter);
+                flag+=2;
+                character=heap[flag];
+                numcharacter="";
+                index++;
+                continue;
+               
+            }
+            else if(character==",")
+            {
+                // number[index]=parseFloat(numcharacter);
+                // index++;
+                number[index].x=parseFloat(numcharacter);
+                if(number[index].id==-1)
+                    number[index].id=number[index-1].id;
+                character=heap[++flag];
+                numcharacter="";
+                continue;
+            }
+            else
+            {
+                numcharacter+=character;
+                character=heap[++flag];
+                continue;
+            }
+        }
+        return number;
+    }
+
+    function draw(number)
+    {
+        var minX=number[0].x,minY=number[0].y,maxX=number[0].x,maxY=number[0].y;
+        var centerX,centerY;
+        for(var i=0;number[i].x!=-1;i++)
+        {
+            if(number[i].x>maxX)
+            maxX=number[i].x;
+            if(number[i].y>maxY)
+            maxY=number[i].y;
+            if(number[i].x<minX)
+            minX=number[i].x;
+            if(number[i].y<minY)
+            minY=number[i].y;
+        }
+        // var minX=number[0];maxX=number[0];minY=number[1];maxY=number[1];
+        // var centerX,centerY;
+        // for(var i=2;i<number.length;i++)
+        // {
+        //     if(number[i]==-1)
+        //         continue;
+        //     if(number[i]>maxX)
+        //         maxX=number[i];
+        //     if(number[i]<minX)
+        //         minX=number[i];
+        //     i++;
+        //     if(number[i]>maxY)
+        //         maxY=number[i];
+        //     if(number[i]<minY)
+        //         minY=number[i];
+
+        // }
+        centerX=(minX+maxX)/2;
+        centerY=(minY+maxY)/2;
+
+        for(var i=0;number[i].x!=-1;i++)
+        {
+            number[i].x=(number[i].x-centerX)/1000;
+            number[i].y=(number[i].y-centerY)/1000;
+            // if(number[i]==-1)
+            //     continue;
+            // number[i]=(number[i]-centerX)/1000;
+            // i++;
+            // number[i]=(number[i]-centerY)/1000;
+        }
+
+        var canvas=document.getElementById('myCanvas');   
+        var ctx=canvas.getContext('2d');
+
+        ctx.beginPath();
+        var tempX,tempY;
+
+     
+        tempX=number[0].x+500;
+        tempY=400-number[0].y;                 
+        ctx.moveTo(tempX,tempY);
+        for(var i=1;number[i].x!=-1;i++)
+        {
+            if(number[i].id!=number[i-1].id)
+            {
+                ctx.closePath();
+                ctx.beginPath();       
+                tempX=number[i].x+500;
+                tempY=400-number[i].y;      
+                ctx.moveTo(tempX,tempY);
+                continue;
+            }
+          
+            tempX=number[i].x+500;
+            tempY=400-number[i].y; 
+            ctx.lineTo(tempX,tempY);
+            ctx.stroke();
+            
+                
+         }
+    }
+
+
+
+
+</script>
+    
+        <body>
+                <input id="fileInput" type="file" >
+                <!-- <select name="" id="type"> 
+                    <option value="1">江苏省地图</option> 
+                    <option value="2">江苏省地图墨卡托反算</option> 
+                </select> -->
+                <input type="button" onclick="mainFun()" value="GO!"> <br>
+                <canvas id="myCanvas" width="1000" height="800" style="border:1px solid #747272">your browser does not support the canvas tag </canvas>
+                
+        </body>
+            
+            
+    </html>
