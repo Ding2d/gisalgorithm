@@ -1,0 +1,411 @@
+<html>
+    <head>
+        <title>
+          Picuture Compression BY.Ding!
+        </title>
+        <link rel='stylesheet' href='/stylesheet/style.css'/>
+        <script src="http://cdn.static.runoob.com/libs/jquery/1.10.2/jquery.min.js">
+        </script>
+    </head>
+<script>
+    function co(id,x,y)
+    {
+        this.id=id;
+        this.x=x;
+        this.y=y;
+    }
+    function param(slope,intercept)
+    {
+        this.slope=slope;
+        this.intercept=intercept; 
+    }
+    function coord(x,y)
+    {
+        this.x=x;
+        this.y=y;
+    }
+    function figSlope(coordHead,coordTail)
+    {
+        var k,b;
+        var p=new param();
+        k=(coordTail.y-coordHead.y)/(coordTail.x-coordHead.x);
+        b=coordHead.y-k*coordHead.x;
+        p.slope=k;
+        p.intercept=b;
+        return p;
+    }
+
+    function distance(c,p)
+    {
+        var dis=(Math.abs(p.slope*c.x-c.y+p.intercept))/Math.sqrt(p.slope*p.slope+1);
+        return dis;
+    }
+
+    function digitalExtraction(str,number)
+    {
+        
+        var heap= str.replace(/[^0-9.,-LEND]/ig,"B");
+        var numcharacter="";//存储数字字符
+        var line;
+              
+        var index=0;//数组id
+        var flag=3;//heap字符串当前标记
+        var n=0;//标识数字与字符转换位置
+        var character=heap[flag];//获取字符串的一个字符
+        number[0].id=1;
+
+        while(character!=null)
+        {
+            if(character=="E")
+            {
+                if(heap[flag+5]=="E")
+                    break;
+                flag+=5;
+                character=heap[flag];
+                while(character!="B")
+                {
+                    numcharacter+=character;
+                    flag++;
+                    character=heap[flag];
+                }
+        
+                number[index].id=number[index-1].id+1;
+                numcharacter="";
+                flag+=2;
+                character=heap[flag];
+            }
+            else if(character=="B")
+            {
+                number[index].y=parseFloat(numcharacter);
+            
+                flag+=2;
+                character=heap[flag];
+                numcharacter="";
+                index++;
+                continue;
+               
+            }
+            else if(character==",")
+            {
+             
+                number[index].x=parseFloat(numcharacter);
+                if(number[index].id==-1)
+                    number[index].id=number[index-1].id;
+                character=heap[++flag];
+                numcharacter="";
+                continue;
+            }
+            else
+            {
+                numcharacter+=character;
+                character=heap[++flag];
+                continue;
+            }
+        }
+        return number;
+    }
+    function findCenter(number)
+    {
+        var center=new Array();
+        var minX=number[0].x,minY=number[0].y,maxX=number[0].x,maxY=number[0].y;
+        for(var i=0;number[i].x!=-1;i++)
+        {
+            if(number[i].x>maxX)
+            maxX=number[i].x;
+            if(number[i].y>maxY)
+            maxY=number[i].y;
+            if(number[i].x<minX)
+            minX=number[i].x;
+            if(number[i].y<minY)
+            minY=number[i].y;
+        }
+        center[0]=(minX+maxX)/2;
+        center[1]=(minY+maxY)/2;
+        return center;
+    }
+
+    function lambert(number)
+    {
+      
+        var m,m1,m2;
+        var n;
+        var t,t1,t2;
+        var F;
+        var O;
+        var r0,r;
+        var L,L0;
+        var a,b,e;
+        var B0,B1,B2;
+        var pi=Math.PI;
+           
+        a=6378245; b=6356863.01877;  e=Math.sqrt(a*a-b*b)/a; 
+        B0=0;  B1=20;  B2=40;  L0=105;
+        m1=Math.cos(B1*pi/180)/Math.sqrt(1-e*e*Math.sin(B1*pi/180)*Math.sin(B1*pi/180));
+        m2=Math.cos(B2*pi/180)/Math.sqrt(1-e*e*Math.sin(B2*pi/180)*Math.sin(B2*pi/180));
+        t1=Math.tan(pi/4-B1*pi/360)/Math.pow((1-e*Math.sin(B1*pi/180))/(1-e*Math.sin(B1*pi/180)),e/2);
+        t2=Math.tan(pi/4-B2*pi/360)/Math.pow((1-e*Math.sin(B2*pi/180))/(1-e*Math.sin(B2*pi/180)),e/2);
+        n=Math.log(m1/m2)/Math.log(t1/t2);
+        F=m1/(n*Math.pow(t1,n));
+        r0=a*F;
+
+        for(var i=0;i<number.length&&number[i].id!=-1;i++)
+        {
+            L=number[i].x;
+            B=number[i].y;
+      
+            t=Math.tan(pi/4-B*pi/360)/Math.pow((1-e*Math.sin(B*pi/180))/(1-e*Math.sin(B*pi/180)),e/2);
+            r=a*F*Math.pow(t,n);
+            O=n*(L-L0);
+            number[i].y=r0-r*Math.cos(O*pi/180);
+            number[i].x=r*Math.sin(O*pi/180);
+        }
+        //到此兰勃特变换结束，下面开始进行坐标系的转换,从地理坐标系到窗口坐标系
+        var centerX,centerY;
+        var center=findCenter(number);
+        centerX=center[0];centerY=center[1];
+
+        for(var i=0;number[i].id!=-1;i++)
+        {
+            number[i].x=(number[i].x-centerX)/10000;
+            number[i].y=(number[i].y-centerY)/10000;
+        }
+
+        //draw(number);
+        return number;
+
+    }
+    function draw(number)
+    {
+        var canvas=document.getElementById('myCanvas');   
+        var ctx=canvas.getContext('2d');
+        canvas.height=canvas.height;
+
+        ctx.beginPath();
+        var tempX,tempY;
+
+        tempX=number[0].x+500;
+        tempY=400-number[0].y;                 
+        ctx.moveTo(tempX,tempY);
+        for(var i=1;i<number.length&&number[i].x!=-1;i++)
+        {
+            if(number[i].id!=number[i-1].id)
+            {
+                ctx.stroke();
+                ctx.beginPath();       
+                tempX=number[i].x+500;
+                tempY=400-number[i].y;      
+                ctx.moveTo(tempX,tempY);
+                continue;
+            }
+          
+            tempX=number[i].x+500;
+            tempY=400-number[i].y; 
+            ctx.lineTo(tempX,tempY);
+     
+        }
+        ctx.stroke();
+        ctx.font="15px Arial";
+        ctx.textAlign="right";
+        ctx.fillText("Powered By Ding!",990,790);
+    }
+    function draw2(number)
+    {
+        var canvas=document.getElementById('myCanvas2');   
+        var ctx=canvas.getContext('2d');
+        var compressDegree;
+        canvas.height=canvas.height;
+        ctx.beginPath();
+        var tempX,tempY;
+
+        tempX=number[0].x+500;
+        tempY=400-number[0].y;                 
+        ctx.moveTo(tempX,tempY);
+        for(var i=1;i<number.length&&number[i].x!=-1;i++)
+        {
+            if(number[i].id!=number[i-1].id)
+            {
+                ctx.stroke();
+                ctx.beginPath();       
+                tempX=number[i].x+500;
+                tempY=400-number[i].y;      
+                ctx.moveTo(tempX,tempY);
+                continue;
+            }
+          
+            tempX=number[i].x+500;
+            tempY=400-number[i].y; 
+            ctx.lineTo(tempX,tempY);
+
+        }
+        var s=String(number.length/26688);
+        ctx.stroke();
+        ctx.font="15px Arial";
+        ctx.textAlign="right";
+        ctx.fillText("Powered By Ding!",990,790);
+        ctx.font="20px Arial";
+        ctx.textAlign="center";
+        ctx.fillText("当前压缩率为："+s,500,30);
+    }
+    function mainFun()
+    {
+        var canvas=document.getElementById('myCanvas');   
+        var ctx=canvas.getContext('2d');
+        
+       
+        var fun=parseInt(document.getElementById("type").value);
+        var file=document.getElementById("fileInput").files[0];
+        var reader=new FileReader();
+        reader.readAsText(file);
+        reader.onload=function(e)
+        {
+            var str = this.result;//读取文本
+            var number = new Array();
+            for(var k=0;k<63000;k++)
+            {    //一维长度为i,i为变量，可以根据实际情况改变
+               number[k]=new co(-1,-1.0,-1.0);  //声明二维，每一个一维数组里面的一个元素都是一个数组；	
+            }
+    
+            number=digitalExtraction(str,number);
+            switch(fun)
+            {
+                case 1:
+                rawMap(number);
+                break;
+                case 2:
+                draw(lambert(number));
+                break;
+                case 3:
+                number=lambert(number);
+                var threshold=parseFloat(document.getElementById("threshold").value);
+                var newNumber = new Array();
+                for(var i=0;number[i].id!=-1;)
+                {
+                    var k=0;
+                    var median;
+                    if(i==0)
+                    k=165;
+                    else
+                    {
+                        i++;
+                        while(number[i+k].id==number[i+k-1].id)
+                        {
+                            k++;
+                        }
+                    }
+                    if(k%2==0)
+                    median=k/2;
+                    else
+                    median=(k+1)/2;
+                    Douglas_Peukcer(i,i+median,number,newNumber,threshold);
+                    Douglas_Peukcer(i+median+1,i+k-1,number,newNumber,threshold);
+                    i=i+k;
+                }
+                draw2(newNumber);
+                    break;
+
+            }
+            //lambert(number);
+           
+            
+        }
+    }
+   
+    function Douglas_Peukcer(head,tail,number,newNumber,threshold)
+    {
+        var max=0;
+        var p=new param();
+        //tail=tail+1;
+        p=figSlope(number[head],number[tail-1]);
+        var maxx=distance(number[head+1],p);
+        for(var i=head+1;i<tail-1;i++)
+        {
+            if(distance(number[i],p)>threshold&&distance(number[i],p)>=maxx)
+            {
+                max=i;
+                maxx=distance(number[i],p);
+            }
+        }
+        if(max==0)
+        {
+           //newNumber=newNumber.concat(number.slice(head,tail));
+           newNumber.push(number[head]);
+           newNumber.push(number[tail]);
+           return;
+        }
+        // else if(head+1==max&&tail-2!=max)
+        // {
+        //     Douglas_Peukcer(max+1,tail,number,newNumber,threshold);
+        // }
+        //else if(tail-2==max&&head+1!=max)
+        // {
+        //     Douglas_Peukcer(head,max+1,number,newNumber,threshold);
+        // }
+        else if(tail-2==max&&head+1==max)
+        {
+            newNumber.push(number[max]);
+            newNumber.push(number[max+1]);
+            return;
+        }
+        else
+        {
+            Douglas_Peukcer(head,max,number,newNumber,threshold);
+            Douglas_Peukcer(max+1,tail,number,newNumber,threshold);
+        }
+    }
+
+    function rawMap(number)
+    {
+        var centerX,centerY;
+        var center=findCenter(number);
+        centerX=center[0];centerY=center[1];
+
+        for(var i=0;number[i].x!=-1;i++)
+        {
+            number[i].x=(number[i].x-centerX)*10;
+            number[i].y=(number[i].y-centerY)*10;
+      
+        }
+        draw(number);
+        
+    }
+
+    $(document).ready(function () 
+    {
+        $("#type").change(function () 
+        {
+            var a = document.getElementById("threshold");
+            var b = document.getElementById("type").value;
+            if (b==3) 
+            {
+            a.style.display="inline-block";
+            }
+            else
+            {
+            a.style.display="none";
+            }
+        })
+    })
+
+
+
+
+
+
+
+</script>
+    
+        <body>
+                <input id="fileInput" type="file" >
+                <select name="" id="type"> 
+                    <option value="1">中国地图</option> 
+                    <option value="2">中国地图兰勃特投影</option>
+                    <option value="3">压缩地图</option> 
+                </select>
+                <input id="threshold" type="text" style="display:none;" placeholder="在此输入阈值"><input type="button" onclick="mainFun()" value="GO!"> 
+                <br>阈值输入建议：0.1~10之间效果最明显，压缩率50%在阈值为0.11-0.12之间<br>
+                <canvas id="myCanvas" width="1000" height="800" style="border:1px solid #747272">your browser does not support the canvas tag </canvas>
+                <canvas id="myCanvas2" width="1000" height="800" style="border:1px solid #747272">your browser does not support the canvas tag </canvas>
+        </body>
+            
+            
+    </html>
